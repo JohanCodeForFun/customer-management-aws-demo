@@ -10,7 +10,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"}) // Support both Vite dev server ports
+@CrossOrigin(origins = {
+    "http://localhost:5173", 
+    "http://localhost:5174",
+    "${cors.allowed-origins:*}"
+}) // Support local development and production
 public class CustomerController {
 
     @Autowired
@@ -49,10 +53,38 @@ public class CustomerController {
 
     @PostMapping
     public Customer createCustomer(@RequestBody Customer customer) {
+        // Input validation and sanitization
+        if (customer == null) {
+            throw new IllegalArgumentException("Customer data cannot be null");
+        }
+        
+        String firstName = customer.getFirstName();
+        String lastName = customer.getLastName();
+        
+        // Validate and sanitize first name
+        if (firstName == null || firstName.trim().isEmpty()) {
+            throw new IllegalArgumentException("First name cannot be empty");
+        }
+        if (lastName == null || lastName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Last name cannot be empty");
+        }
+        
+        // Sanitize input: remove dangerous characters and limit length
+        firstName = firstName.trim()
+                .replaceAll("[<>\"'%;()&+]", "")
+                .substring(0, Math.min(firstName.trim().length(), 50));
+        lastName = lastName.trim()
+                .replaceAll("[<>\"'%;()&+]", "")
+                .substring(0, Math.min(lastName.trim().length(), 50));
+        
+        if (firstName.isEmpty() || lastName.isEmpty()) {
+            throw new IllegalArgumentException("Names cannot be empty after sanitization");
+        }
+        
         jdbcTemplate.update(
                 "INSERT INTO customers(first_name, last_name) VALUES (?, ?)",
-                customer.getFirstName(),
-                customer.getLastName()
+                firstName,
+                lastName
         );
         
         // Get the newly created customer
@@ -63,8 +95,8 @@ public class CustomerController {
                         rs.getString("first_name"),
                         rs.getString("last_name")
                 ),
-                customer.getFirstName(),
-                customer.getLastName()
+                firstName,
+                lastName
         );
         
         return customers.get(0);
@@ -83,6 +115,20 @@ public class CustomerController {
 
     @GetMapping("/search")
     public List<Customer> searchCustomers(@RequestParam String name) {
+        // Input validation and sanitization
+        if (name == null || name.trim().isEmpty()) {
+            return List.of(); // Return empty list for invalid input
+        }
+        
+        // Sanitize input: remove potentially dangerous characters and limit length
+        String sanitizedName = name.trim()
+                .replaceAll("[<>\"'%;()&+]", "") // Remove potential SQL injection characters
+                .substring(0, Math.min(name.trim().length(), 50)); // Limit to 50 characters
+        
+        if (sanitizedName.isEmpty()) {
+            return List.of(); // Return empty list if nothing remains after sanitization
+        }
+        
         return jdbcTemplate.query(
                 "SELECT id, first_name, last_name FROM customers WHERE first_name ILIKE ? OR last_name ILIKE ? ORDER BY id",
                 (rs, rowNum) -> new Customer(
@@ -90,8 +136,8 @@ public class CustomerController {
                         rs.getString("first_name"),
                         rs.getString("last_name")
                 ),
-                "%" + name + "%",
-                "%" + name + "%"
+                "%" + sanitizedName + "%",
+                "%" + sanitizedName + "%"
         );
     }
 }
