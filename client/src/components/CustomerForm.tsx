@@ -14,7 +14,7 @@ const CustomerForm = ({ onCustomerAdded }: CustomerFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (!firstName.trim() || !lastName.trim()) {
       alert('Please enter both first name and last name');
       return;
@@ -26,7 +26,7 @@ const CustomerForm = ({ onCustomerAdded }: CustomerFormProps) => {
         firstName: firstName.trim(),
         lastName: lastName.trim()
       });
-      
+
       onCustomerAdded(newCustomer);
       setFirstName('');
       setLastName('');
@@ -55,7 +55,7 @@ const CustomerForm = ({ onCustomerAdded }: CustomerFormProps) => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="lastName">Last Name:</label>
             <input
@@ -69,7 +69,7 @@ const CustomerForm = ({ onCustomerAdded }: CustomerFormProps) => {
             />
           </div>
         </div>
-        
+
         <button type="submit" disabled={loading} className="submit-btn">
           {loading ? 'Adding...' : 'Add Customer'}
         </button>

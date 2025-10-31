@@ -35,7 +35,7 @@ const CustomerList = ({ customers, onCustomerDeleted, onRefresh }: CustomerListP
           🔄 Refresh
         </button>
       </div>
-      
+
       {customers.length === 0 ? (
         <div className="empty-state">
           <p>No customers found</p>
@@ -48,7 +48,7 @@ const CustomerList = ({ customers, onCustomerDeleted, onRefresh }: CustomerListP
                 <h3>{customer.firstName} {customer.lastName}</h3>
                 <p>ID: {customer.id}</p>
               </div>
-              <button 
+              <button
                 onClick={() => handleDelete(customer.id)}
                 className="delete-btn"
                 disabled={loading}

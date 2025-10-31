@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,6 +29,7 @@ public class RelationalDataAccessApplication implements CommandLineRunner {
 	JdbcTemplate jdbcTemplate;
 
 	@GetMapping("/api/health")
+	@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
 	public String health() {
 		return "Customer Management API is running!";
 	}
