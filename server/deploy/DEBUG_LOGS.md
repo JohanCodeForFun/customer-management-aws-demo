@@ -3,12 +3,14 @@
 ## 🚀 **Quick Debug Steps**
 
 ### **Step 1: Check EB Console Logs**
+
 1. Go to **AWS Elastic Beanstalk Console**
 2. Select your environment
 3. Click **"Logs"** in left sidebar
 4. Click **"Request Logs"** → **"Full Logs"**
 
 ### **Step 2: SSH to EC2 Instance**
+
 ```bash
 # Get your instance IP from EB Console
 ssh -i your-key.pem ec2-user@your-instance-ip
@@ -17,6 +19,7 @@ ssh -i your-key.pem ec2-user@your-instance-ip
 ```
 
 ### **Step 3: Key Log Files to Check**
+
 ```bash
 # Application logs
 sudo tail -f /var/log/eb-engine.log
@@ -39,6 +42,7 @@ sudo netstat -tlnp | grep :5000
 ## 🔍 **Common Error Patterns**
 
 ### **Database Connection Issues:**
+
 ```
 ERROR: could not connect to server: Connection refused
 ERROR: FATAL: password authentication failed
@@ -46,12 +50,14 @@ ERROR: database "customerdb" does not exist
 ```
 
 ### **Port Binding Issues:**
+
 ```
 ERROR: Port 5000 already in use
 ERROR: Address already in use
 ```
 
 ### **Spring Boot Startup Issues:**
+
 ```
 ERROR: Application failed to start
 ERROR: Unable to start web server
@@ -59,6 +65,7 @@ ERROR: Bean creation exception
 ```
 
 ### **Environment Variable Issues:**
+
 ```
 ERROR: Required environment variable not found
 ERROR: Could not resolve placeholder
@@ -67,6 +74,7 @@ ERROR: Could not resolve placeholder
 ## 🛠 **Quick Fixes**
 
 ### **1. Check Environment Variables:**
+
 ```bash
 # SSH to instance and check env vars
 sudo su
@@ -75,6 +83,7 @@ printenv | grep SPRING
 ```
 
 ### **2. Check Database Connectivity:**
+
 ```bash
 # Test database connection
 telnet your-rds-endpoint.amazonaws.com 5432
@@ -84,6 +93,7 @@ psql -h your-rds-endpoint.amazonaws.com -U customeruser -d customerdb
 ```
 
 ### **3. Check Application Status:**
+
 ```bash
 # Check if app is running
 sudo systemctl status web
@@ -94,6 +104,7 @@ ps aux | grep java
 ```
 
 ### **4. Manual Application Test:**
+
 ```bash
 # Try running the JAR manually
 cd /var/app/current
@@ -109,20 +120,23 @@ sudo java -Dspring.profiles.active=production \
 ## 🎯 **Most Likely Issues**
 
 ### **Issue 1: Database Table Missing**
+
 ```sql
 -- Connect to RDS and create table
 CREATE TABLE customers (
-    id SERIAL PRIMARY KEY, 
-    first_name VARCHAR(255), 
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(255),
     last_name VARCHAR(255)
 );
 ```
 
 ### **Issue 2: Security Group**
+
 - EB instances can't reach RDS
 - RDS security group doesn't allow EB security group
 
 ### **Issue 3: Environment Variables**
+
 - Wrong RDS endpoint
 - Incorrect credentials
 - Missing environment variables
@@ -164,9 +178,11 @@ top -n 1 | head -5
 If nothing works, try this sequence:
 
 1. **Rebuild Environment:**
+
    - Go to EB Console → Actions → Rebuild Environment
 
 2. **Or Redeploy:**
+
    - Upload the `deploy-fixed-*.zip` again
    - Set environment variables again
    - Create database table again
