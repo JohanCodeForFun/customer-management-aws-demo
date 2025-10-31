@@ -36,18 +36,21 @@ customer-management-aws/
 ### Run Locally
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/JohanCodeForFun/customer-management-aws-demo.git
    cd customer-management-aws-demo
    ```
 
 2. **Start PostgreSQL** and create database:
+
    ```bash
    cd server
    ./setup-postgres.sh
    ```
 
 3. **Run the application**:
+
    ```bash
    ./mvnw spring-boot:run
    ```
@@ -61,23 +64,27 @@ customer-management-aws/
 ## Development Roadmap
 
 ### Phase 1: Local Development ✅
+
 - [x] Spring Boot application with PostgreSQL
 - [x] Basic customer data model
 - [x] Database setup scripts
 
 ### Phase 2: REST API 🚧
+
 - [ ] Convert to REST API with Spring Web
 - [ ] Add Customer controller with CRUD operations
 - [ ] Add data validation and error handling
 - [ ] Add Swagger/OpenAPI documentation
 
 ### Phase 3: Frontend 🚧
+
 - [ ] Create React application
 - [ ] Customer list and management UI
 - [ ] API integration with Axios
 - [ ] Responsive design
 
 ### Phase 4: AWS Deployment 🚧
+
 - [ ] Configure for AWS RDS
 - [ ] Deploy backend to Elastic Beanstalk
 - [ ] Deploy frontend to AWS Amplify
@@ -86,17 +93,20 @@ customer-management-aws/
 ## Technology Stack
 
 **Backend:**
+
 - Spring Boot 3.3.0
 - Spring JDBC
 - PostgreSQL
 - Maven
 
 **Frontend (Planned):**
+
 - React 18
 - Axios for API calls
 - Material-UI or Tailwind CSS
 
 **Infrastructure (Planned):**
+
 - AWS RDS (PostgreSQL)
 - AWS Elastic Beanstalk
 - AWS Amplify
@@ -105,6 +115,7 @@ customer-management-aws/
 ## Contributing
 
 This is a learning project demonstrating AWS integration patterns. Feel free to:
+
 - Open issues for questions or suggestions
 - Submit pull requests for improvements
 - Fork the project for your own experiments

@@ -7,12 +7,15 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @SpringBootApplication
+@RestController
 public class RelationalDataAccessApplication implements CommandLineRunner {
 
 	private static final Logger log = LoggerFactory.getLogger(RelationalDataAccessApplication.class);
@@ -24,10 +27,15 @@ public class RelationalDataAccessApplication implements CommandLineRunner {
 	@Autowired
 	JdbcTemplate jdbcTemplate;
 
+	@GetMapping("/api/health")
+	public String health() {
+		return "Customer Management API is running!";
+	}
+
 	@Override
 	public void run(String... strings) throws Exception {
 
-		log.info("Creating tables");
+		log.info("Initializing database tables and sample data...");
 
 		jdbcTemplate.execute("DROP TABLE IF EXISTS customers");
 		jdbcTemplate.execute("CREATE TABLE customers(" +
@@ -38,16 +46,11 @@ public class RelationalDataAccessApplication implements CommandLineRunner {
 				.map(name -> name.split(" "))
 				.collect(Collectors.toList());
 
-		// Use a Java 8 stream to print out each tuple of the list
-		splitUpNames.forEach(name -> log.info(String.format("Inserting customer record for %s %s", name[0], name[1])));
-
 		// Uses JdbcTemplate's batchUpdate operation to bulk load data
 		jdbcTemplate.batchUpdate("INSERT INTO customers(first_name, last_name) VALUES (?,?)", splitUpNames);
 
-		log.info("Querying for customer records where first_name = 'Josh':");
-		jdbcTemplate.query(
-				"SELECT id, first_name, last_name FROM customers WHERE first_name = ?",
-				(rs, rowNum) -> new Customer(rs.getLong("id"), rs.getString("first_name"), rs.getString("last_name")), "Josh")
-		.forEach(customer -> log.info(customer.toString()));
+		log.info("Database initialized with {} customers", splitUpNames.size());
+		log.info("API available at http://localhost:8080/api/customers");
+		log.info("Health check at http://localhost:8080/api/health");
 	}
 }
