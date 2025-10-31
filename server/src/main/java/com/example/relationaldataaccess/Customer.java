@@ -10,6 +10,9 @@ public class Customer {
 		this.lastName = lastName;
 	}
 
+	// Default constructor
+	public Customer() {}
+
 	@Override
 	public String toString() {
 		return String.format(
@@ -17,5 +20,13 @@ public class Customer {
 				id, firstName, lastName);
 	}
 
-	// getters & setters omitted for brevity
+	// Getters and setters
+	public long getId() { return id; }
+	public void setId(long id) { this.id = id; }
+	
+	public String getFirstName() { return firstName; }
+	public void setFirstName(String firstName) { this.firstName = firstName; }
+	
+	public String getLastName() { return lastName; }
+	public void setLastName(String lastName) { this.lastName = lastName; }
 }
