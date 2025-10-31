@@ -10,11 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
-@CrossOrigin(origins = {
-    "http://localhost:5173", 
-    "http://localhost:5174",
-    "${cors.allowed-origins:*}"
-}) // Support local development and production
+@CrossOrigin(origins = "${cors.allowed-origins:http://localhost:5173,http://localhost:5174}")
 public class CustomerController {
 
     @Autowired
