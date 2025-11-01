@@ -44,17 +44,10 @@ public class RelationalDataAccessApplication implements CommandLineRunner {
 		return "Customer Management API is running! Profile: " + String.join(",", environment.getActiveProfiles());
 	}
 
-	@GetMapping("/api/customers")
+	@GetMapping("/api/ping")
 	@CrossOrigin(origins = "${cors.allowed-origins:http://localhost:5173,http://localhost:5174}")
-	public String getAllCustomers() {
-		log.info("Fetching all customers");
-		try {
-			Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM customers", Long.class);
-			return "Found " + count + " customers in database";
-		} catch (Exception e) {
-			log.error("Error fetching customers: {}", e.getMessage());
-			return "Error connecting to database: " + e.getMessage();
-		}
+	public String ping() {
+		return "pong";
 	}
 
 	@Override
