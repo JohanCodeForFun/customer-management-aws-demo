@@ -24,23 +24,29 @@ customer-management-aws-demo/
 │   ├── .env.production        # Production environment variables
 │   └── package.json           # Node.js dependencies
 ├── server/                     # Spring Boot API
-│   ├── .ebextensions/         # AWS Elastic Beanstalk configuration
+│   ├── deploy/                # AWS deployment package
+│   │   ├── .ebextensions/     # AWS Elastic Beanstalk configuration
+│   │   ├── Procfile           # Process configuration for deployment
+│   │   └── *.jar              # Compiled application
 │   ├── src/main/java/         # Java source code
 │   │   └── com/example/relationaldataaccess/
 │   │       ├── Customer.java                    # Data model
 │   │       ├── RelationalDataAccessApplication.java  # Main application
 │   │       └── controller/
 │   │           └── CustomerController.java      # REST API endpoints
+│   ├── src/main/resources/    # Application configuration
+│   │   ├── application.properties              # Local configuration
+│   │   └── application-production.properties   # Production configuration
 │   ├── src/test/java/         # Security and unit tests
-│   ├── application.properties          # Local configuration
-│   ├── application-production.properties  # Production configuration
 │   ├── Dockerfile             # Container configuration
-│   └── pom.xml               # Maven dependencies
+│   ├── pom.xml               # Maven dependencies (build tool)
+│   └── mvnw                  # Maven wrapper
 ├── .github/workflows/         # CI/CD pipelines
-│   └── deploy.yml            # Automated deployment workflow
 ├── amplify.yml               # AWS Amplify build configuration
+├── BUILD_AND_DEPLOY.md       # Detailed build and deployment guide
 ├── DEPLOYMENT.md             # Comprehensive deployment guide
 ├── SECURITY.md               # Security documentation
+├── INSTRUCTOR_GUIDE.md       # Educational materials
 ├── setup.sh                  # Local development setup script
 └── README.md                 # This file
 ```
@@ -73,6 +79,7 @@ customer-management-aws-demo/
 - ✅ **AWS Ready**: Configured for Amplify, Elastic Beanstalk, and RDS
 - ✅ **Environment Management**: Separate configs for dev/prod
 - ✅ **Security Testing**: Automated security validation
+- ✅ **Educational Materials**: Swedish guides and instructor resources
 
 ## 🚀 Quick Start
 
@@ -209,7 +216,7 @@ git push origin main  # Triggers automatic deployment
 - **Spring JDBC** - Database access layer
 - **PostgreSQL** - Primary database
 - **JUnit 5** - Testing framework
-- **Maven** - Build and dependency management
+- **Maven** - Build and dependency management (single build tool)
 
 ### Frontend
 
@@ -289,8 +296,10 @@ This project demonstrates modern full-stack development with AWS cloud deploymen
 
 ## 📚 Additional Resources
 
+- **[BUILD_AND_DEPLOY.md](BUILD_AND_DEPLOY.md)** - Step-by-step build and deployment guide
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Complete AWS deployment guide
 - **[SECURITY.md](SECURITY.md)** - Security features and best practices
+- **[INSTRUCTOR_GUIDE.md](INSTRUCTOR_GUIDE.md)** - Educational materials and teaching guide
 - **[Spring Boot Docs](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/)** - Framework documentation
 - **[React Docs](https://react.dev/)** - Frontend library documentation
 - **[AWS Documentation](https://docs.aws.amazon.com/)** - Cloud platform guides
