@@ -59,17 +59,43 @@ public class RelationalDataAccessApplication implements CommandLineRunner {
 		log.info("CORS allowed origins: {}", corsAllowedOrigins);
 		
 		if (isProduction) {
-			log.info("Production mode: Skipping database initialization");
-			log.info("Ensure your RDS database has the 'customers' table created");
+			log.info("Production mode: Checking and initializing database if needed...");
 			
 			// Check if table exists in production
 			try {
 				Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM customers", Long.class);
 				log.info("Connected to database successfully. Current customer count: {}", count);
 			} catch (Exception e) {
-				log.error("Database connection failed: {}", e.getMessage());
-				log.error("Please ensure RDS database is accessible and 'customers' table exists");
-				// Don't fail startup - let health checks handle it
+				log.warn("Table 'customers' doesn't exist or database connection issue: {}", e.getMessage());
+				log.info("Attempting to create 'customers' table and sample data...");
+				
+				try {
+					// Create table if it doesn't exist
+					jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS customers(" +
+							"id SERIAL PRIMARY KEY, " +
+							"first_name VARCHAR(255) NOT NULL, " +
+							"last_name VARCHAR(255) NOT NULL, " +
+							"created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+					
+					// Check if table is empty and add sample data
+					Long existingCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM customers", Long.class);
+					if (existingCount == 0) {
+						log.info("Table created but empty. Adding sample data...");
+						
+						// Add sample data
+						List<Object[]> splitUpNames = Arrays.asList("John Woo", "Jeff Dean", "Josh Bloch", "Josh Long", "Jane Doe", "Alice Smith").stream()
+								.map(name -> name.split(" "))
+								.collect(Collectors.toList());
+
+						jdbcTemplate.batchUpdate("INSERT INTO customers(first_name, last_name) VALUES (?,?)", splitUpNames);
+						log.info("Sample data added: {} customers", splitUpNames.size());
+					} else {
+						log.info("Table exists with {} existing customers", existingCount);
+					}
+				} catch (Exception createException) {
+					log.error("Failed to create table or add data: {}", createException.getMessage());
+					// Don't fail startup - let health checks handle it
+				}
 			}
 		} else {
 			// Development mode: Initialize database
