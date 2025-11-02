@@ -2,6 +2,19 @@
 
 This guide provides step-by-step instructions for building and deploying the enhanced Spring Boot application with automatic table creation to AWS Elastic Beanstalk.
 
+> **⚠️ CRITICAL WARNING:**
+>
+> **The deployment WILL FAIL if `Procfile` and `.ebextensions/` are missing!**
+>
+> Without these files:
+>
+> - ❌ Application runs in development mode (wrong database)
+> - ❌ Wrong port configuration
+> - ❌ Missing environment variables
+> - ❌ Connection refused errors
+>
+> **Always verify these files exist in the deploy/ folder BEFORE creating deploy.zip**
+
 ## 📋 **Prerequisites**
 
 - ✅ Java 17+ installed
@@ -32,28 +45,107 @@ mvn clean package -DskipTests
 
 ## 📦 **Deployment Package Creation**
 
-### **Step 3: Copy Updated JAR to Deploy Folder**
+### **Step 3: Verify Deploy Folder Structure** ⚠️
+
+**CRITICAL:** Before creating the deployment package, ensure the `deploy/` folder contains ALL required files:
+
+```bash
+ls -la deploy/
+```
+
+**Required files checklist:**
+
+- ✅ `Procfile` - **ESSENTIAL** - Sets production profile and port
+- ✅ `.ebextensions/` directory with `app-config.config` - **ESSENTIAL** - Environment configuration
+- ✅ Previous JAR file (will be replaced in next step)
+
+**If missing, copy from working template:**
+
+```bash
+# If Procfile is missing
+cp deploy-AUTO-TABLE-CREATION/Procfile deploy/
+
+# If .ebextensions is missing
+cp -r deploy-AUTO-TABLE-CREATION/.ebextensions deploy/
+```
+
+### **Step 4: Copy Updated JAR to Deploy Folder**
 
 ```bash
 cp target/relational-data-access-complete-0.0.1-SNAPSHOT.jar deploy/
 ```
 
-### **Step 4: Create Deployment ZIP**
+### **Step 5: Verify Complete Package**
+
+```bash
+ls -la deploy/
+```
+
+**Expected output:**
+
+```
+drwxr-xr-x   .ebextensions/
+-rw-r--r--   Procfile
+-rw-r--r--   relational-data-access-complete-0.0.1-SNAPSHOT.jar
+```
+
+### **Step 6: Create Deployment ZIP**
 
 ```bash
 cd deploy && zip -r ../deploy.zip .
 ```
 
-**Package Contents:**
+**Verify ZIP contents:**
+
+```bash
+unzip -l deploy.zip
+```
+
+**Package Contents (MUST contain ALL):**
 
 - ✅ `relational-data-access-complete-0.0.1-SNAPSHOT.jar` - Updated application with auto table creation
-- ✅ `Procfile` - Startup configuration for Elastic Beanstalk
-- ✅ `.ebextensions/app-config.config` - AWS configuration settings
-- ✅ `application-production.properties` - Production database configuration
+- ✅ `Procfile` - **CRITICAL** - Startup configuration for Elastic Beanstalk with production profile
+- ✅ `.ebextensions/app-config.config` - **CRITICAL** - AWS configuration settings and environment variables
+
+## 🔍 **Quick Deployment Package Verification**
+
+Before deploying, run this quick check to ensure you have the correct package:
+
+```bash
+# Verify deploy.zip contains ALL required files
+unzip -l deploy.zip
+```
+
+**✅ CORRECT OUTPUT (deploy.zip should contain):**
+
+```
+Archive:  deploy.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+ 22510080  11-02-2025 21:48   relational-data-access-complete-0.0.1-SNAPSHOT.jar
+        0  11-02-2025 21:59   .ebextensions/
+     2228  11-02-2025 21:59   .ebextensions/app-config.config
+      242  11-02-2025 21:59   Procfile
+---------                     -------
+ 22512550                     4 files
+```
+
+**❌ BROKEN OUTPUT (missing configuration files):**
+
+```
+Archive:  deploy.zip
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+ 22510080  11-02-2025 21:48   relational-data-access-complete-0.0.1-SNAPSHOT.jar
+---------                     -------
+ 22510080                     1 file
+```
+
+**If you see the broken output above, DO NOT DEPLOY! Fix the package first using the steps in the troubleshooting section.**
 
 ## 🌐 **AWS Deployment**
 
-### **Step 5: Deploy to Elastic Beanstalk**
+### **Step 7: Deploy to Elastic Beanstalk**
 
 1. **Open AWS Elastic Beanstalk Console**
 
@@ -70,7 +162,7 @@ cd deploy && zip -r ../deploy.zip .
    - ⏱️ Deployment time: 2-5 minutes
    - ✅ Status should show: "Environment update completed successfully"
 
-### **Step 6: Verify Environment Variables**
+### **Step 8: Verify Environment Variables**
 
 Go to **Configuration** → **Software** → **Environment Variables** and ensure these are set:
 
@@ -87,7 +179,7 @@ CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:5174,https://main.dj
 
 ## 🧪 **Post-Deployment Testing**
 
-### **Step 7: Test Health Endpoint**
+### **Step 9: Test Health Endpoint**
 
 ```bash
 curl http://customer-management-api-env.eba-qt9mipk3.eu-north-1.elasticbeanstalk.com/api/health
@@ -99,7 +191,7 @@ curl http://customer-management-api-env.eba-qt9mipk3.eu-north-1.elasticbeanstalk
 Customer Management API is running! Profile: production
 ```
 
-### **Step 8: Test Automatic Table Creation**
+### **Step 10: Test Automatic Table Creation**
 
 ```bash
 curl http://customer-management-api-env.eba-qt9mipk3.eu-north-1.elasticbeanstalk.com/api/customers
@@ -118,7 +210,7 @@ curl http://customer-management-api-env.eba-qt9mipk3.eu-north-1.elasticbeanstalk
 ]
 ```
 
-### **Step 9: Check Application Logs**
+### **Step 11: Check Application Logs**
 
 In Elastic Beanstalk Console → **Logs** → **Request Logs** → **Full Logs**
 
@@ -136,11 +228,12 @@ Application started successfully
 ```
 deploy/
 ├── relational-data-access-complete-0.0.1-SNAPSHOT.jar  # Main application
-├── Procfile                                            # EB startup configuration
-├── .ebextensions/
-│   └── app-config.config                              # AWS-specific settings
-└── application-production.properties                  # Database configuration
+├── Procfile                                            # EB startup configuration (ESSENTIAL)
+└── .ebextensions/
+    └── app-config.config                              # AWS-specific settings (ESSENTIAL)
 ```
+
+**Note:** The `application-production.properties` file is embedded in the JAR file, not needed as a separate file.
 
 ## 🎯 **Key Features Deployed**
 
@@ -165,6 +258,70 @@ deploy/
 - ✅ Frontend CORS support for multiple domains
 
 ## 🚨 **Troubleshooting**
+
+### **❌ Application Runs in Development Mode (CRITICAL):**
+
+**Symptoms:**
+
+- Logs show "No active profile set, falling back to 1 default profile: 'default'"
+- Database connection errors: "Failed to obtain JDBC Connection"
+- Application tries to connect to localhost instead of RDS
+- 502 Bad Gateway errors from nginx
+- Connection refused errors to port 5000
+
+**Root Cause:** Missing `Procfile` or `.ebextensions/app-config.config` in deployment package
+
+**Fix:**
+
+1. Check what's in your deploy.zip:
+
+   ```bash
+   unzip -l deploy.zip
+   ```
+
+2. If missing files, recreate deploy folder from template:
+
+   ```bash
+   rm -rf deploy/*
+   cp -r deploy-AUTO-TABLE-CREATION/* deploy/
+   cp target/relational-data-access-complete-0.0.1-SNAPSHOT.jar deploy/
+   cd deploy && zip -r ../deploy.zip .
+   ```
+
+3. Verify fixed package:
+
+   ```bash
+   unzip -l deploy.zip
+   # Must show: Procfile, .ebextensions/, and .jar file
+   ```
+
+4. **Re-deploy immediately** - Upload the fixed deploy.zip to Elastic Beanstalk
+
+### **❌ 502 Bad Gateway with Connection Refused:**
+
+**Symptoms:**
+
+- nginx error: "connect() failed (111: Connection refused) while connecting to upstream"
+- Application logs show port 8080 instead of 5000
+- Web requests return 502 Bad Gateway
+
+**Root Cause:** Application running on wrong port due to missing production profile
+
+**Immediate Fix:**
+
+1. This is the SAME issue as above - deploy the corrected package
+2. After deployment, verify in logs:
+
+   ```
+   ✅ Should see: "Tomcat initialized with port 5000 (http)"
+   ❌ Currently shows: "Tomcat initialized with port 8080 (http)"
+   ```
+
+3. Verify production profile is active:
+   ```
+   ✅ Should see: "The following 1 profile is active: 'production'"
+   ❌ Currently shows: "No active profile set, falling back to 1 default profile: 'default'"
+   ```
 
 ### **Deployment Fails:**
 
