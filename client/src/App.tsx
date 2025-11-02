@@ -91,7 +91,7 @@ function App() {
         <p>
           Backend: Spring Boot + PostgreSQL |
           Frontend: React + TypeScript |
-          <a href="http://localhost:8080/api/health" target="_blank" rel="noopener noreferrer">
+          <a href={import.meta.env.VITE_API_BASE_URL} target="_blank" rel="noopener noreferrer">
             API Health Check
           </a>
         </p>
