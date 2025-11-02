@@ -1,10 +1,8 @@
 version: 2
 updates:
-
+  # Maven dependencies for server
   - package-ecosystem: "maven"
-    directories:
-      - "/initial"
-      - "/complete"
+    directory: "/server"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
@@ -12,14 +10,13 @@ updates:
       interval: "monthly"
     target-branch: "main"
     groups:
-      guide-dependencies-maven:
+      server-dependencies:
         patterns:
           - "*"
 
-  - package-ecosystem: "gradle"
-    directories:
-      - "/initial"
-      - "/complete"
+  # npm dependencies for client
+  - package-ecosystem: "npm"
+    directory: "/client"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
@@ -27,6 +24,6 @@ updates:
       interval: "monthly"
     target-branch: "main"
     groups:
-      guide-dependencies-gradle:
+      client-dependencies:
         patterns:
           - "*"
