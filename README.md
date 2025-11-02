@@ -318,4 +318,4 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE.txt
 
 ---
 
-**Built with ❤️ by Johan** | [GitHub](https://github.com/JohanCodeForFun) | [LinkedIn](https://linkedin.com/in/johan-hellberg)
+**Built with ❤️ by Johan** | [GitHub](https://github.com/JohanCodeForFun) | [LinkedIn](https://www.linkedin.com/in/johan-hellberg-805078167/)
