@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Integration Tests
     needs: [test-backend, test-frontend]
-    
+
     services:
       postgres:
         image: postgres:14
