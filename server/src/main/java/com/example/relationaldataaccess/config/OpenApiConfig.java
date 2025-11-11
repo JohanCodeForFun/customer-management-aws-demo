@@ -15,21 +15,27 @@ import io.swagger.v3.oas.models.servers.Server;
 @Configuration
 public class OpenApiConfig {
 
-    @Value("${cors.allowed-origins:http://localhost:5173}")
-    private String allowedOrigins;
+    @Value("${server.url:}")
+    private String serverUrl;
+
+    @Value("${server.port:8080}")
+    private String serverPort;
 
     @Bean
     public OpenAPI customerManagementOpenAPI() {
-        // Parse the first allowed origin for the server URL
-        String serverUrl = allowedOrigins.split(",")[0].trim();
+        // Determine the server URL
+        String apiServerUrl;
         
-        // For local development, use backend URL
-        if (serverUrl.contains("localhost:5173") || serverUrl.contains("localhost:5174")) {
-            serverUrl = "http://localhost:8080";
+        if (serverUrl != null && !serverUrl.isEmpty()) {
+            // Use configured server URL (for production deployment)
+            apiServerUrl = serverUrl;
+        } else {
+            // Use localhost with configured port (for local development)
+            apiServerUrl = "http://localhost:" + serverPort;
         }
 
         Server server = new Server()
-                .url(serverUrl)
+                .url(apiServerUrl)
                 .description("Customer Management API Server");
 
         Contact contact = new Contact()
