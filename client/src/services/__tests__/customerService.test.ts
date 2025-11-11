@@ -1,8 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import axios from 'axios';
 import { customerService } from '../customerService';
 
-// Mock axios
 vi.mock('axios', () => ({
   default: {
     get: vi.fn(),
@@ -11,7 +9,11 @@ vi.mock('axios', () => ({
   },
 }));
 
-const mockedAxios = axios as any;
+// Get references to the mocked functions
+import axios from 'axios';
+const mockGet = vi.mocked(axios.get);
+const mockPost = vi.mocked(axios.post);
+const mockDelete = vi.mocked(axios.delete);
 
 describe('Customer Service', () => {
   beforeEach(() => {
@@ -24,11 +26,11 @@ describe('Customer Service', () => {
       { id: 2, firstName: 'Jane', lastName: 'Smith' }
     ];
 
-    mockedAxios.get.mockResolvedValue({ data: mockCustomers });
+    mockGet.mockResolvedValue({ data: mockCustomers });
 
     const result = await customerService.getAllCustomers();
 
-    expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining('/customers'));
+    expect(mockGet).toHaveBeenCalledWith(expect.stringContaining('/customers'));
     expect(result).toEqual(mockCustomers);
   });
 
@@ -36,11 +38,11 @@ describe('Customer Service', () => {
     const newCustomer = { firstName: 'Test', lastName: 'User' };
     const createdCustomer = { id: 3, ...newCustomer };
 
-    mockedAxios.post.mockResolvedValue({ data: createdCustomer });
+    mockPost.mockResolvedValue({ data: createdCustomer });
 
     const result = await customerService.createCustomer(newCustomer);
 
-    expect(mockedAxios.post).toHaveBeenCalledWith(
+    expect(mockPost).toHaveBeenCalledWith(
       expect.stringContaining('/customers'),
       newCustomer
     );
@@ -50,11 +52,11 @@ describe('Customer Service', () => {
   it('should delete a customer', async () => {
     const customerId = 1;
 
-    mockedAxios.delete.mockResolvedValue({});
+    mockDelete.mockResolvedValue({});
 
     await customerService.deleteCustomer(customerId);
 
-    expect(mockedAxios.delete).toHaveBeenCalledWith(
+    expect(mockDelete).toHaveBeenCalledWith(
       expect.stringContaining(`/customers/${customerId}`)
     );
   });
@@ -63,11 +65,11 @@ describe('Customer Service', () => {
     const searchName = 'John';
     const mockResults = [{ id: 1, firstName: 'John', lastName: 'Doe' }];
 
-    mockedAxios.get.mockResolvedValue({ data: mockResults });
+    mockGet.mockResolvedValue({ data: mockResults });
 
     const result = await customerService.searchCustomers(searchName);
 
-    expect(mockedAxios.get).toHaveBeenCalledWith(
+    expect(mockGet).toHaveBeenCalledWith(
       expect.stringContaining('/customers/search'),
       expect.objectContaining({
         params: { name: searchName }
@@ -79,11 +81,11 @@ describe('Customer Service', () => {
   it('should perform health check', async () => {
     const healthMessage = 'Customer Management API is running!';
 
-    mockedAxios.get.mockResolvedValue({ data: healthMessage });
+    mockGet.mockResolvedValue({ data: healthMessage });
 
     const result = await customerService.healthCheck();
 
-    expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining('/health'));
+    expect(mockGet).toHaveBeenCalledWith(expect.stringContaining('/health'));
     expect(result).toBe(healthMessage);
   });
 });
