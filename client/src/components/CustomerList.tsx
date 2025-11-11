@@ -52,9 +52,10 @@ const CustomerList = ({ customers, onCustomerDeleted, onRefresh }: CustomerListP
                 onClick={() => handleDelete(customer.id)}
                 className="delete-btn"
                 disabled={loading}
-                title="Delete customer"
+                title={`Delete ${customer.firstName} ${customer.lastName}`}
+                aria-label={`Delete customer ${customer.firstName} ${customer.lastName}`}
               >
-                🗑️
+                <span className="delete-icon">DEL</span>
               </button>
             </div>
           ))}
