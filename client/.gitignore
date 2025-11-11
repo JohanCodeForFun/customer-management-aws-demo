@@ -20,6 +20,7 @@ dist-ssr
 *.local
 
 # Editor directories and files
+integration-test-results.xml
 .vscode/*
 !.vscode/extensions.json
 .idea
