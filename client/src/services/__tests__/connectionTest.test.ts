@@ -124,7 +124,7 @@ describe('Backend Integration Tests', () => {
 
     // If results exist, they should contain 'John'
     if (response.body.length > 0) {
-      const hasJohn = response.body.some((customer: any) =>
+      const hasJohn = response.body.some((customer: { firstName: string; lastName: string }) =>
         customer.firstName.toLowerCase().includes('john') ||
         customer.lastName.toLowerCase().includes('john')
       );
