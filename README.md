@@ -124,14 +124,23 @@ chmod +x setup.sh
    psql postgres -c "GRANT ALL PRIVILEGES ON DATABASE customerdb TO customeruser;"
    ```
 
-3. **Start the backend**:
+3. **Setup frontend environment variables**:
+
+   ```bash
+   # Copy template and configure for your environment
+   cd client
+   cp .env.production.example .env.production
+   # Edit .env.production with your actual API URL
+   ```
+
+4. **Start the backend**:
 
    ```bash
    cd server
    ./mvnw spring-boot:run
    ```
 
-4. **Start the frontend** (in a new terminal):
+5. **Start the frontend** (in a new terminal):
    ```bash
    cd client
    npm install
