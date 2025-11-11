@@ -18,14 +18,22 @@ export default defineConfig({
     },
     // CI-specific configuration
     ...(process.env.CI && {
-      pool: 'threads',
+      pool: process.env.VITEST_ENVIRONMENT === 'jsdom' ? 'forks' : 'threads',
       poolOptions: {
         threads: {
           singleThread: true
+        },
+        forks: {
+          singleFork: true
         }
       },
-      teardownTimeout: 10000,
-      testTimeout: 20000 // Increased timeout for integration tests
+      teardownTimeout: 5000,
+      testTimeout: 20000,
+      // Force exit for integration tests to prevent hanging
+      ...(process.env.VITEST_ENVIRONMENT === 'jsdom' && {
+        forceRerunTriggers: [],
+        watch: false
+      })
     })
   },
   define: {

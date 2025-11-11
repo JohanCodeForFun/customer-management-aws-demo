@@ -196,6 +196,7 @@ jobs:
           npm ci
 
       - name: Run integration tests
+        timeout-minutes: 5
         run: |
           echo "Testing backend connectivity before running integration tests..."
           curl -f http://localhost:8080/api/health
@@ -204,10 +205,18 @@ jobs:
           sleep 3
           echo "Running integration tests..."
           cd client
-          npm run test:integration:ci
+
+          # Run tests with proper cleanup
+          timeout 120s ./run-integration-tests.sh || {
+            echo "Integration tests failed or timed out"
+            echo "Checking for hanging processes..."
+            ps aux | grep -E "(vitest|vite|node)" | grep -v grep || echo "No hanging processes found"
+            exit 1
+          }
         env:
           VITE_API_BASE_URL: http://localhost:8080
           VITEST_ENVIRONMENT: jsdom
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
       - name: Collect backend logs on failure
         if: failure()
