@@ -1,8 +1,17 @@
 package com.example.relationaldataaccess;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Customer entity representing a customer in the system")
 public class Customer {
+	@Schema(description = "Unique identifier for the customer", example = "1", accessMode = Schema.AccessMode.READ_ONLY)
 	private long id;
-	private String firstName, lastName;
+	
+	@Schema(description = "Customer's first name", example = "John", maxLength = 50, requiredMode = Schema.RequiredMode.REQUIRED)
+	private String firstName;
+	
+	@Schema(description = "Customer's last name", example = "Doe", maxLength = 50, requiredMode = Schema.RequiredMode.REQUIRED)
+	private String lastName;
 
 	public Customer(long id, String firstName, String lastName) {
 		this.id = id;
