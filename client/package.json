@@ -12,6 +12,7 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run --exclude src/services/__tests__/connectionTest.test.ts",
     "test:unit": "vitest run src/services/__tests__/customerService.test.ts",
+    "test:unit:ci": "vitest run src/services/__tests__/customerService.test.ts --no-coverage --reporter=verbose",
     "test:integration": "vitest run src/services/__tests__/connectionTest.test.ts",
     "test:ci": "vitest run --reporter=junit --outputFile=test-results.xml --exclude src/services/__tests__/connectionTest.test.ts",
     "test:integration:ci": "vitest run src/services/__tests__/connectionTest.test.ts --reporter=junit --outputFile=integration-test-results.xml"

@@ -9,8 +9,8 @@ const originalError = console.error;
 beforeEach(() => {
   console.warn = (...args: unknown[]) => {
     if (
-      args[0] && 
-      typeof args[0] === 'string' && 
+      args[0] &&
+      typeof args[0] === 'string' &&
       (args[0].includes('webidl-conversions') || args[0].includes('whatwg-url'))
     ) {
       return;
@@ -20,8 +20,8 @@ beforeEach(() => {
 
   console.error = (...args: unknown[]) => {
     if (
-      args[0] && 
-      typeof args[0] === 'string' && 
+      args[0] &&
+      typeof args[0] === 'string' &&
       (args[0].includes('webidl-conversions') || args[0].includes('whatwg-url'))
     ) {
       return;
