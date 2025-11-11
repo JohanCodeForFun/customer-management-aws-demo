@@ -5,9 +5,11 @@
 For proper Swagger UI functionality in different environments, set the following environment variable:
 
 ### Local Development
+
 No additional configuration needed. The application will automatically use `http://localhost:8080`.
 
 ### AWS Elastic Beanstalk Deployment
+
 Set the following environment variable in your Elastic Beanstalk environment:
 
 ```
@@ -15,6 +17,7 @@ SERVER_URL=https://your-elasticbeanstalk-app-url.region.elasticbeanstalk.com
 ```
 
 ### Other Cloud Deployments
+
 Set the `SERVER_URL` environment variable to your deployed backend URL:
 
 ```
@@ -24,6 +27,7 @@ SERVER_URL=https://your-backend-api-domain.com
 ## How to Set Environment Variables in AWS Elastic Beanstalk
 
 ### Method 1: AWS Console
+
 1. Go to your Elastic Beanstalk application
 2. Navigate to Configuration → Software
 3. In Environment Properties, add:
@@ -31,6 +35,7 @@ SERVER_URL=https://your-backend-api-domain.com
    - **Value**: Your actual backend URL
 
 ### Method 2: .ebextensions Configuration
+
 Create or update `.ebextensions/environment.config`:
 
 ```yaml
@@ -41,6 +46,7 @@ option_settings:
 ```
 
 ### Method 3: EB CLI
+
 ```bash
 eb setenv SERVER_URL=https://your-app-name.region.elasticbeanstalk.com
 ```
@@ -64,6 +70,7 @@ If Swagger UI shows incorrect server URLs:
 ## Security Note
 
 In production, consider:
+
 - Restricting access to Swagger UI in production environments
 - Using authentication for API documentation
 - Setting `springdoc.swagger-ui.enabled=false` for production if needed
