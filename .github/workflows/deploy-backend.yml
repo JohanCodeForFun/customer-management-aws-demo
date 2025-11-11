@@ -1,0 +1,76 @@
+name: Deploy to Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'server/**'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy Backend to AWS Elastic Beanstalk
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build Spring Boot application
+        run: |
+          cd server
+          ./mvnw clean package -DskipTests
+          
+      - name: Verify build output
+        run: |
+          cd server
+          ls -la target/
+          if [ ! -f "target/relational-data-access-complete-0.0.1-SNAPSHOT.jar" ]; then
+            echo "Build failed - JAR file not found!"
+            exit 1
+          fi
+
+      - name: Prepare deployment package
+        run: |
+          cd server
+          mkdir -p deploy-package
+          cp target/relational-data-access-complete-0.0.1-SNAPSHOT.jar deploy-package/
+          cp deploy/Procfile deploy-package/
+          cp -r deploy/.ebextensions deploy-package/
+          
+      - name: Create deployment zip
+        run: |
+          cd server/deploy-package
+          zip -r ../deploy-${{ github.sha }}.zip .
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: customer-management-api # Replace with your EB app name
+          environment_name: customer-management-api-env # Replace with your EB env name
+          region: eu-north-1 # Replace with your AWS region
+          version_label: ${{ github.sha }}
+          deployment_package: server/deploy-${{ github.sha }}.zip
+          
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deployment-package-${{ github.sha }}
+          path: server/deploy-${{ github.sha }}.zip
