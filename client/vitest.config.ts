@@ -2,7 +2,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    environment: 'jsdom',
+    // Use different environments for different test types
+    environment: process.env.VITEST_ENVIRONMENT || 'node',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     testTimeout: 30000,
@@ -17,6 +18,7 @@ export default defineConfig({
     },
     // CI-specific configuration
     ...(process.env.CI && {
+      environment: 'node', // Force node environment in CI
       pool: 'threads',
       poolOptions: {
         threads: {
