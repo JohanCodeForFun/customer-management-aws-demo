@@ -1,5 +1,9 @@
 package com.example.relationaldataaccess;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +16,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @SpringBootApplication
 @RestController
@@ -47,7 +47,7 @@ public class RelationalDataAccessApplication implements CommandLineRunner {
 	@GetMapping("/api/ping")
 	@CrossOrigin(origins = "${cors.allowed-origins:http://localhost:5173,http://localhost:5174}")
 	public String ping() {
-		return "pong";
+		return "pong_99";
 	}
 
 	@Override
