@@ -45,35 +45,57 @@ mvn clean package -DskipTests
 
 ## 📦 **Deployment Package Creation**
 
-### **Step 3: Verify Deploy Folder Structure** ⚠️
+### **Step 3: Create Deploy Folder and Configuration Files**
 
-**CRITICAL:** Before creating the deployment package, ensure the `deploy/` folder contains ALL required files:
+**Create the deployment folder structure and required configuration files:**
 
-```bash
-ls -la deploy/
-```
+````bash
+# Create deploy directory
+mkdir -p deploy
 
-**Required files checklist:**
+# Create Procfile
+echo "web: java -Dspring.profiles.active=production -Dserver.port=\$PORT -jar relational-data-access-complete-0.0.1-SNAPSHOT.jar" > deploy/Procfile
 
-- ✅ `Procfile` - **ESSENTIAL** - Sets production profile and port
-- ✅ `.ebextensions/` directory with `app-config.config` - **ESSENTIAL** - Environment configuration
-- ✅ Previous JAR file (will be replaced in next step)
+# Create .ebextensions directory and configuration
+mkdir -p deploy/.ebextensions
+cat > deploy/.ebextensions/app-config.config << 'EOF'
+option_settings:
+  aws:elasticbeanstalk:application:environment:
+    # Spring Boot Configuration
+    SPRING_PROFILES_ACTIVE: production
 
-**If missing, copy from working template:**
+    # Port Configuration for Elastic Beanstalk
+    PORT: 5000
 
-```bash
-# If Procfile is missing
-cp deploy-AUTO-TABLE-CREATION/Procfile deploy/
+    # AWS RDS Database configuration (set these in EB Console)
+    # RDS_HOSTNAME: your-rds-endpoint.amazonaws.com
+    # RDS_PORT: 5432
+    # RDS_DB_NAME: customerdb
+    # RDS_USERNAME: your-username
+    # RDS_PASSWORD: your-password
 
-# If .ebextensions is missing
-cp -r deploy-AUTO-TABLE-CREATION/.ebextensions deploy/
-```
+    # Application Configuration
+    JPA_DDL_AUTO: validate
+    JPA_SHOW_SQL: false
+    LOG_LEVEL: INFO
+    SPRING_LOG_LEVEL: INFO
 
-### **Step 4: Copy Updated JAR to Deploy Folder**
+    # CORS Configuration - AWS Amplify URL
+    CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:${FRONTEND_URL:*}}
+
+  aws:elasticbeanstalk:environment:process:default:
+    Port: '5000'
+    Protocol: HTTP
+    HealthCheckPath: /api/health
+    HealthCheckTimeout: 15
+    HealthyThresholdCount: 3
+    UnhealthyThresholdCount: 5
+EOF
+```### **Step 4: Copy Updated JAR to Deploy Folder**
 
 ```bash
 cp target/relational-data-access-complete-0.0.1-SNAPSHOT.jar deploy/
-```
+````
 
 ### **Step 5: Verify Complete Package**
 
@@ -279,21 +301,50 @@ deploy/
    unzip -l deploy.zip
    ```
 
-2. If missing files, recreate deploy folder from template:
+2. If missing files, recreate deploy folder with required files:
 
    ```bash
+   # Remove corrupted deploy folder
    rm -rf deploy/*
-   cp -r deploy-AUTO-TABLE-CREATION/* deploy/
-   cp target/relational-data-access-complete-0.0.1-SNAPSHOT.jar deploy/
-   cd deploy && zip -r ../deploy.zip .
+
+   # Recreate Procfile
+   echo "web: java -Dspring.profiles.active=production -Dserver.port=\$PORT -jar relational-data-access-complete-0.0.1-SNAPSHOT.jar" > deploy/Procfile
+
+   # Recreate .ebextensions configuration
+   mkdir -p deploy/.ebextensions
+   cat > deploy/.ebextensions/app-config.config << 'EOF'
+   option_settings:
+   aws:elasticbeanstalk:application:environment:
+    SPRING_PROFILES_ACTIVE: production
+    PORT: 5000
+
    ```
+
+aws:elasticbeanstalk:environment:process:default:
+Port: '5000'
+Protocol: HTTP
+HealthCheckPath: /api/health
+HealthCheckTimeout: 15
+HealthyThresholdCount: 3
+UnhealthyThresholdCount: 5
+EOF
+
+# Copy the JAR file
+
+cp target/relational-data-access-complete-0.0.1-SNAPSHOT.jar deploy/
+
+# Create deployment package
+
+cd deploy && zip -r ../deploy.zip .
+
+````
 
 3. Verify fixed package:
 
-   ```bash
-   unzip -l deploy.zip
-   # Must show: Procfile, .ebextensions/, and .jar file
-   ```
+```bash
+unzip -l deploy.zip
+# Must show: Procfile, .ebextensions/, and .jar file
+````
 
 4. **Re-deploy immediately** - Upload the fixed deploy.zip to Elastic Beanstalk
 
