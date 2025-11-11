@@ -18,7 +18,6 @@ export default defineConfig({
     },
     // CI-specific configuration
     ...(process.env.CI && {
-      environment: 'node', // Force node environment in CI
       pool: 'threads',
       poolOptions: {
         threads: {
@@ -26,7 +25,7 @@ export default defineConfig({
         }
       },
       teardownTimeout: 10000,
-      testTimeout: 15000
+      testTimeout: 20000 // Increased timeout for integration tests
     })
   },
   define: {

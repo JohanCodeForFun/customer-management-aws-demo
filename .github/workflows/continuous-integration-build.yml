@@ -144,17 +144,51 @@ jobs:
         run: |
           cd server
           nohup java -jar target/relational-data-access-complete-0.0.1-SNAPSHOT.jar > backend.log 2>&1 &
-          echo "Backend PID: $!"
+          echo "Backend PID: $!" > backend.pid
+          echo "Backend started, checking logs..."
+          sleep 5
+          tail -20 backend.log || echo "No logs yet"
         env:
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/customerdb
-          SPRING_DATASOURCE_USERNAME: customeruser
-          SPRING_DATASOURCE_PASSWORD: customerpass
-          SPRING_PROFILES_ACTIVE: test
+          # Override default values for CI
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: customerdb
+          DB_USERNAME: customeruser
+          DB_PASSWORD: customerpass
+          JPA_DDL_AUTO: create-drop
+          JPA_SHOW_SQL: true
+          LOG_LEVEL: DEBUG
           CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://localhost:3000"
+          # Use default profile, not test (which uses H2)
+          SPRING_PROFILES_ACTIVE: default
 
       - name: Wait for backend to start
         run: |
-          timeout 60 bash -c 'until curl -f http://localhost:8080/api/health; do sleep 2; done'
+          cd server
+          echo "Waiting for backend to be ready..."
+          for i in {1..30}; do
+            echo "Attempt $i/30..."
+            if curl -f -s http://localhost:8080/api/health; then
+              echo "Backend is ready!"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "Backend failed to start after 30 attempts"
+              echo "Backend logs:"
+              cat backend.log
+              exit 1
+            fi
+            sleep 2
+          done
+
+          # Verify database connectivity by checking customers endpoint
+          echo "Testing database connectivity..."
+          curl -f -s http://localhost:8080/api/customers || {
+            echo "Database connectivity test failed"
+            echo "Backend logs:"
+            cat backend.log
+            exit 1
+          }
 
       - name: Install frontend dependencies
         run: |
@@ -163,11 +197,26 @@ jobs:
 
       - name: Run integration tests
         run: |
+          echo "Testing backend connectivity before running integration tests..."
+          curl -f http://localhost:8080/api/health
+          curl -f http://localhost:8080/api/customers
+          echo "Backend is responding, waiting 3 seconds for full initialization..."
+          sleep 3
+          echo "Running integration tests..."
           cd client
           npm run test:integration:ci
         env:
           VITE_API_BASE_URL: http://localhost:8080
           VITEST_ENVIRONMENT: jsdom
+
+      - name: Collect backend logs on failure
+        if: failure()
+        run: |
+          echo "=== BACKEND LOGS ==="
+          cd server
+          cat backend.log || echo "No backend logs found"
+          echo "=== BACKEND PROCESS STATUS ==="
+          ps aux | grep java || echo "No Java processes found"
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
