@@ -47,7 +47,7 @@ public class RelationalDataAccessApplication implements CommandLineRunner {
 	@GetMapping("/api/ping")
 	@CrossOrigin(origins = "${cors.allowed-origins:http://localhost:5173,http://localhost:5174}")
 	public String ping() {
-		return "pong_99";
+		return "pong";
 	}
 
 	@Override
