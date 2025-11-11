@@ -10,12 +10,6 @@ export const customerService = {
     return response.data;
   },
 
-  // Get customer by ID
-  getCustomerById: async (id: number): Promise<Customer> => {
-    const response = await axios.get(`${API_BASE_URL}/customers/${id}`);
-    return response.data;
-  },
-
   // Create new customer
   createCustomer: async (customer: Omit<Customer, 'id'>): Promise<Customer> => {
     const response = await axios.post(`${API_BASE_URL}/customers`, customer);
