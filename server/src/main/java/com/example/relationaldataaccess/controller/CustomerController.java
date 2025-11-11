@@ -1,21 +1,58 @@
 package com.example.relationaldataaccess.controller;
 
-import com.example.relationaldataaccess.Customer;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.example.relationaldataaccess.Customer;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/customers")
 @CrossOrigin(origins = "${cors.allowed-origins:http://localhost:5173,http://localhost:5174}")
+@Tag(name = "Customer Management", description = "REST API for managing customer data with full CRUD operations and search functionality")
 public class CustomerController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Operation(
+        summary = "Get all customers", 
+        description = "Retrieve a complete list of all customers in the system, ordered by ID"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Successfully retrieved customers",
+            content = @Content(
+                mediaType = "application/json", 
+                schema = @Schema(implementation = Customer.class),
+                examples = @ExampleObject(
+                    name = "Customer list example",
+                    value = "[{\"id\":1,\"firstName\":\"John\",\"lastName\":\"Doe\"},{\"id\":2,\"firstName\":\"Jane\",\"lastName\":\"Smith\"}]"
+                )
+            )
+        )
+    })
     @GetMapping
     public List<Customer> getAllCustomers() {
         return jdbcTemplate.query(
@@ -28,8 +65,32 @@ public class CustomerController {
         );
     }
 
+    @Operation(
+        summary = "Get customer by ID", 
+        description = "Retrieve a specific customer by their unique identifier"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Customer found",
+            content = @Content(
+                mediaType = "application/json", 
+                schema = @Schema(implementation = Customer.class),
+                examples = @ExampleObject(
+                    name = "Customer example",
+                    value = "{\"id\":1,\"firstName\":\"John\",\"lastName\":\"Doe\"}"
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "404", 
+            description = "Customer not found with the specified ID"
+        )
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<Customer> getCustomerById(
+        @Parameter(description = "Unique identifier of the customer", required = true, example = "1")
+        @PathVariable Long id) {
         List<Customer> customers = jdbcTemplate.query(
                 "SELECT id, first_name, last_name FROM customers WHERE id = ?",
                 (rs, rowNum) -> new Customer(
@@ -47,8 +108,44 @@ public class CustomerController {
         return ResponseEntity.ok(customers.get(0));
     }
 
+    @Operation(
+        summary = "Create a new customer", 
+        description = "Create a new customer with the provided first name and last name. Names are automatically sanitized and validated for security."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Customer successfully created",
+            content = @Content(
+                mediaType = "application/json", 
+                schema = @Schema(implementation = Customer.class),
+                examples = @ExampleObject(
+                    name = "Created customer example",
+                    value = "{\"id\":3,\"firstName\":\"John\",\"lastName\":\"Doe\"}"
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "400", 
+            description = "Invalid customer data provided (empty names, null data, etc.)"
+        )
+    })
     @PostMapping
-    public Customer createCustomer(@RequestBody Customer customer) {
+    public Customer createCustomer(
+        @Parameter(description = "Customer data with firstName and lastName", required = true)
+        @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Customer object with first name and last name",
+            required = true,
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = Customer.class),
+                examples = @ExampleObject(
+                    name = "New customer example",
+                    value = "{\"firstName\":\"John\",\"lastName\":\"Doe\"}"
+                )
+            )
+        )
+        @RequestBody Customer customer) {
         // Input validation and sanitization
         if (customer == null) {
             throw new IllegalArgumentException("Customer data cannot be null");
@@ -99,7 +196,28 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCustomer(@PathVariable Long id) {
+    @Operation(
+        summary = "Delete a customer",
+        description = "Deletes a customer by their unique ID. Returns 200 OK if the customer was successfully deleted, or 404 Not Found if no customer exists with the specified ID."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Customer successfully deleted"
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Customer not found with the specified ID",
+            content = @Content
+        )
+    })
+    public ResponseEntity<Void> deleteCustomer(
+        @Parameter(
+            description = "The unique identifier of the customer to delete",
+            required = true,
+            example = "1"
+        )
+        @PathVariable Long id) {
         int rowsAffected = jdbcTemplate.update("DELETE FROM customers WHERE id = ?", id);
         
         if (rowsAffected > 0) {
